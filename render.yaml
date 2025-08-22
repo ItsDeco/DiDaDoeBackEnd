@@ -11,10 +11,7 @@ services:
       - key: PORT
         value: 10000
       - key: CLIENT_URL
-        fromService:
-          type: web
-          name: didadoe-frontend
-          property: url
+        value: https://didadoe-frontend.onrender.com
 
   # Frontend Service  
   - type: web
@@ -24,7 +21,4 @@ services:
     staticPublishPath: ./client/dist
     envVars:
       - key: VITE_BACKEND_URL
-        fromService:
-          type: web
-          name: didadoe-backend
-          property: url
+        value: https://didadoe-backend.onrender.com
