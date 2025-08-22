@@ -3,6 +3,8 @@ services:
   - type: web
     name: didadoe-backend
     env: node
+    region: oregon  # Free region
+    plan: free      # Explicitly set free plan
     buildCommand: cd server && npm install
     startCommand: cd server && npm start
     envVars:
@@ -17,6 +19,8 @@ services:
   - type: web
     name: didadoe-frontend
     env: static
+    region: oregon  # Free region
+    plan: free      # Explicitly set free plan
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: ./client/dist
     envVars:
