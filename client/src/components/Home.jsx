@@ -7,7 +7,7 @@ import Pic from '../assets/didadoe.png'
 function Home() {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false)
   const [isOnlineModalOpen, setIsOnlineModalOpen] = useState(false)
-
+  
   const openRulesModal = () => setIsRulesModalOpen(true)
   const closeRulesModal = () => setIsRulesModalOpen(false)
 
