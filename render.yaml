@@ -1,9 +1,9 @@
 services:
   # Backend Service
   - type: web
-    name: didadoe-backend
+    name: didadoeback
     env: node
-    plan: free      # Explicitly set free plan
+    plan: free
     buildCommand: cd server && npm install
     startCommand: cd server && npm start
     envVars:
@@ -12,15 +12,15 @@ services:
       - key: PORT
         value: 10000
       - key: CLIENT_URL
-        value: https://didadoe-frontend.onrender.com
+        value: https://didadoe.onrender.com
 
   # Frontend Service  
   - type: web
-    name: didadoe-frontend
+    name: didadoe
     env: static
-    plan: free      # Explicitly set free plan
+    plan: free
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: ./client/dist
     envVars:
       - key: VITE_BACKEND_URL
-        value: https://didadoe-backend.onrender.com
+        value: https://didadoeback.onrender.com

@@ -1,7 +1,18 @@
 import { io } from 'socket.io-client'
 
-// Use environment variable in production, localhost in development
-const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+const getSocketURL = () => {
+  if (import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL
+  }
+  
+  if (import.meta.env.PROD) {
+    return 'https://didadoeback.onrender.com'
+  }
+  
+  return 'http://localhost:5000'
+}
+
+const SOCKET_URL = getSocketURL()
 
 class SocketService {
   constructor() {
@@ -12,6 +23,7 @@ class SocketService {
   connect() {
     if (this.socket) return this.socket
 
+    console.log('Connecting to socket at:', SOCKET_URL)
     this.socket = io(SOCKET_URL)
 
     this.socket.on('connect', () => {
