@@ -1,0 +1,30 @@
+services:
+  # Backend Service
+  - type: web
+    name: didadoe-backend
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CLIENT_URL
+        fromService:
+          type: web
+          name: didadoe-frontend
+          property: url
+
+  # Frontend Service  
+  - type: web
+    name: didadoe-frontend
+    env: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: ./client/dist
+    envVars:
+      - key: VITE_BACKEND_URL
+        fromService:
+          type: web
+          name: didadoe-backend
+          property: url
