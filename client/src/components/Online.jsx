@@ -74,7 +74,6 @@ function Online() {
       setGameState(data.gameState)
       
       if (data.gameState.gameOver) {
-        // Game is over - show result and disconnect
         const isWinner = data.gameState.winner === newSocket.mySymbol
         setStatus(isWinner ? 'You won! Disconnecting...' : 'You lost! Disconnecting...')
         setIsMyTurn(false)
@@ -84,7 +83,6 @@ function Online() {
           navigate('/')
         }, 3000)
       } else {
-        // Continue game - check whose turn it is
         if (data.gameState.currentPlayer === newSocket.mySymbol) {
           setIsMyTurn(true)
           setStatus('Your turn!')
@@ -117,7 +115,6 @@ function Online() {
     }
   }, [roomCode, navigate])
 
-  // Update mySymbol on socket when it changes
   useEffect(() => {
     if (socket && mySymbol) {
       socket.mySymbol = mySymbol
