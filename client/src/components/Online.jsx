@@ -161,7 +161,7 @@ function Online() {
     <div className="game-container">
       <h1>Online Game</h1>
       {gameState.winner ? (
-        <h2 className="status winner">
+        <h2 className="status-waiting">
           {gameState.winner === mySymbol ? 'You Won! Disconnecting...' : 'You Lost :c Disconnecting...'}
         </h2>
       ) : (
