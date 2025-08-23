@@ -28,6 +28,18 @@ function generateRoomCode() {
   return code
 }
 
+// Helper function to initialize game state with all required properties
+function initializeGameState() {
+  return {
+    board: Array(9).fill(null),
+    currentPlayer: 'X',
+    winner: null,
+    gameOver: false,
+    xMoves: [],
+    oMoves: []
+  }
+}
+
 app.use(helmet())
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -51,12 +63,7 @@ app.post('/api/games/create', (req, res) => {
   const gameRoom = {
     code: roomCode,
     players: [],
-    gameState: {
-      board: Array(9).fill(null),
-      currentPlayer: 'X',
-      winner: null,
-      gameOver: false
-    },
+    gameState: initializeGameState(),
     createdAt: new Date()
   }
   
@@ -94,7 +101,6 @@ app.get('/api/games/:code', (req, res) => {
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id)
   
-  // Join game room
   socket.on('join-room', (data) => {
     const { roomCode, playerName } = data
     const room = gameRooms.get(roomCode)
@@ -109,7 +115,13 @@ io.on('connection', (socket) => {
       return
     }
     
-    // Add player to room
+    if (!room.gameState.xMoves) {
+      room.gameState.xMoves = []
+    }
+    if (!room.gameState.oMoves) {
+      room.gameState.oMoves = []
+    }
+    
     const player = {
       id: socket.id,
       name: playerName || `Player ${room.players.length + 1}`,
@@ -123,14 +135,12 @@ io.on('connection', (socket) => {
     
     console.log(`Player ${player.name} (${player.symbol}) joined room ${roomCode}`)
     
-    // Notify room about player join
     io.to(roomCode).emit('player-joined', {
       player: player,
       players: room.players,
       gameState: room.gameState
     })
     
-    // Start game if 2 players
     if (room.players.length === 2) {
       io.to(roomCode).emit('game-start', {
         message: 'Game started! X goes first.',
@@ -151,65 +161,96 @@ io.on('connection', (socket) => {
       return
     }
     
-    // Check if it's player's turn
     if (room.gameState.currentPlayer !== socket.playerSymbol) {
       socket.emit('error', { message: 'Not your turn' })
       return
     }
     
-    // Check if position is valid
     if (room.gameState.board[index] !== null || room.gameState.gameOver) {
       socket.emit('error', { message: 'Invalid move' })
       return
     }
     
-    // Make the move
-    room.gameState.board[index] = socket.playerSymbol
-    
-    // Check for winner
-    const winner = checkWinner(room.gameState.board)
-    if (winner) {
-      room.gameState.winner = winner
-      room.gameState.gameOver = true
-    } else if (room.gameState.board.every(cell => cell !== null)) {
-      room.gameState.winner = 'draw'
-      room.gameState.gameOver = true
-    } else {
-      // Switch turns
-      room.gameState.currentPlayer = room.gameState.currentPlayer === 'X' ? 'O' : 'X'
+    if (!room.gameState.xMoves) {
+      room.gameState.xMoves = []
+    }
+    if (!room.gameState.oMoves) {
+      room.gameState.oMoves = []
     }
     
-    // Broadcast move to all players in room
-    io.to(roomCode).emit('move-made', {
-      gameState: room.gameState,
-      move: {
-        player: socket.playerSymbol,
-        index: index
+    const gameState = room.gameState
+    let newBoard = [...gameState.board]
+    let newXMoves = [...gameState.xMoves]
+    let newOMoves = [...gameState.oMoves]
+    
+    newBoard[index] = socket.playerSymbol
+    
+    if (socket.playerSymbol === 'X') {
+      newXMoves.push(index)
+      if (newXMoves.length > 3) {
+        const oldestXIndex = newXMoves.shift()
+        newBoard[oldestXIndex] = null
       }
-    })
+      gameState.xMoves = newXMoves
+    } else {
+      newOMoves.push(index)
+      if (newOMoves.length > 3) {
+        const oldestOIndex = newOMoves.shift()
+        newBoard[oldestOIndex] = null
+      }
+      gameState.oMoves = newOMoves
+    }
+    
+    gameState.board = newBoard
+    
+    const winner = checkWinner(gameState.board)
+    if (winner) {
+      gameState.winner = winner
+      gameState.gameOver = true
+      
+      io.to(roomCode).emit('move-made', {
+        gameState: gameState,
+        move: {
+          player: socket.playerSymbol,
+          index: index
+        }
+      })
+      
+      setTimeout(() => {
+        gameRooms.delete(roomCode)
+        console.log(`Game completed, room ${roomCode} deleted`)
+      }, 5000)
+      
+    } else {
+      gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X'
+      
+      io.to(roomCode).emit('move-made', {
+        gameState: gameState,
+        move: {
+          player: socket.playerSymbol,
+          index: index
+        }
+      })
+    }
   })
-  
-  // Handle disconnect
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id)
     
     if (socket.roomCode) {
       const room = gameRooms.get(socket.roomCode)
       if (room) {
-        // Remove player from room
         room.players = room.players.filter(p => p.id !== socket.id)
         
-        // Notify remaining players
         socket.to(socket.roomCode).emit('player-left', {
-          message: 'Opponent disconnected',
-          players: room.players
+          message: 'Opponent disconnected. Game ended.',
+          players: room.players,
+          gameState: { ...room.gameState, gameOver: true }
         })
         
-        // Delete room if empty
-        if (room.players.length === 0) {
+        setTimeout(() => {
           gameRooms.delete(socket.roomCode)
-          console.log(`Room ${socket.roomCode} deleted`)
-        }
+        }, 5000)
       }
     }
   })
@@ -217,9 +258,9 @@ io.on('connection', (socket) => {
 
 function checkWinner(board) {
   const lines = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6]
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+    [0, 4, 8], [2, 4, 6] // diagonals
   ]
   
   for (let line of lines) {
@@ -234,6 +275,6 @@ function checkWinner(board) {
 const PORT = process.env.PORT || 5000
 
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`)
-  console.log(`📱 Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`)
+  console.log(`Server running on port ${PORT}`)
+  console.log(`Client URL: ${process.env.CLIENT_URL || "http://localhost:5173"}`)
 })
