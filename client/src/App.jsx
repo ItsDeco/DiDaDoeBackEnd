@@ -3,7 +3,7 @@ import './App.css'
 import Home from './components/Home'
 import PlayLocal from './components/Local'
 import PlayBot from './components/Bot'
-import PlayOnline from './components/Online'
+import Online from './components/Online'
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/play-local" element={<PlayLocal />} />
           <Route path="/play-bot" element={<PlayBot />} />
-          <Route path="/play-online" element={<PlayOnline />} />
+          <Route path="/play-online/:roomCode" element={<Online />} /> 
         </Routes>
       </div>
   )

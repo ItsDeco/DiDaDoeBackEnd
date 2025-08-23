@@ -17,7 +17,7 @@ A modern twist on classic Tic-Tac-Toe where players can only have 3 pieces on th
 
 ## 3. Demo
 
-[Live Demo]([https://didadoe.netlify.app](https://didadoe.onrender.com))
+[Live Demo](https://didadoe.onrender.com)
 
 ## 4. Built With
 

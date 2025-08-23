@@ -132,7 +132,6 @@ html, body {
   height: 28px;
 }
 
-
 @media(max-width: 420px){
   .app h1{
   font-size: 1.8rem;

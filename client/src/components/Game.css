@@ -53,10 +53,30 @@ html, body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.status-waiting{
+  font-size: 1rem;
+  color: white;
+  margin: 0;
+  background-color: #d6614a;
+  padding: 6px 18px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 .status.winner {
   background-color: #d6614a;
   color: white;
   font-weight: bold;
+}
+
+.status h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+.status.room-code {
+  background-color:rgb(42, 121, 121)
 }
 
 .best-game {
