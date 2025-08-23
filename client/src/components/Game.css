@@ -518,7 +518,7 @@ html, body {
 
 @media (max-width: 391px){
   .board-container{
-    top: -40px;
+    top: -25px;
   }
 
   .status-waiting{
