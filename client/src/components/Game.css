@@ -509,6 +509,22 @@ html, body {
     width: 45%;
     height: 45%;
   }
+
+  .status-waiting{
+    font-size: 0.8rem;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 391px){
+  .board-container{
+    top: -40px;
+  }
+
+  .status-waiting{
+    font-size: 0.8rem;
+    padding: 10px 12px;
+  }
 }
 
 @supports (-webkit-touch-callout: none) {
