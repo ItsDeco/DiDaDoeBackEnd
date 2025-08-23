@@ -517,8 +517,16 @@ html, body {
 }
 
 @media (max-width: 391px){
+  .reset-button {
+    position: absolute;
+    top: 30px;
+    right: 50px;
+    width: 40px;
+    height: 40px;
+  }
+
   .board-container{
-    top: -25px;
+    top: -35px;
   }
 
   .status-waiting{
